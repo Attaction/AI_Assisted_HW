@@ -39,3 +39,30 @@ def test_login_wrong_password_rejected(client):
     )
     resp = client.post("/auth/login", json={"username": "dana", "password": "wrongpass"})
     assert resp.status_code == 401
+
+
+def test_password_stored_hashed_and_salted(client):
+    """AC1 (normal): the stored password is hashed+salted, never plaintext, and each user gets a different salt."""
+    from backend.app.database import get_db
+    from backend.app.models import User
+
+    for name in ("erin", "frank"):
+        resp = client.post(
+            "/auth/register",
+            json={"username": name, "email": f"{name}@example.com", "password": "password123"},
+        )
+        assert resp.status_code == 201
+
+    db = next(client.app.dependency_overrides[get_db]())
+    try:
+        erin = db.query(User).filter_by(username="erin").one()
+        frank = db.query(User).filter_by(username="frank").one()
+    finally:
+        db.close()
+
+    assert erin.password_hash != "password123"
+    assert "password123" not in erin.password_hash
+    assert erin.password_salt
+    assert erin.password_salt != frank.password_salt
+    # Same password, different salt -> different hash.
+    assert erin.password_hash != frank.password_hash

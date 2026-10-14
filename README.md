@@ -27,7 +27,7 @@ for the interactive API docs.
 pytest tests/ -v
 ```
 
-All 15 tests should pass. To reproduce the required faulty-vs-fixed
+All 16 tests should pass. To reproduce the required faulty-vs-fixed
 demonstration for the budget-boundary acceptance criterion (AC4):
 
 ```bash
