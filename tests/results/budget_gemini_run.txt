@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-8.3.4, pluggy-1.6.0 -- C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW
+plugins: anyio-4.15.1
+collecting ... collected 5 items
+tests/test_budget_rule.py::test_add_item_within_budget_normal PASSED     [ 20%]
+tests/test_budget_rule.py::test_add_item_exact_budget_boundary_allowed PASSED [ 40%]
+tests/test_budget_rule.py::test_add_item_over_budget_rejected PASSED     [ 60%]
+tests/test_budget_rule.py::test_zero_budget_blocks_any_priced_item PASSED [ 80%]
+tests/test_budget_rule.py::test_null_budget_allows_any_total PASSED      [100%]
+============================== 5 passed in 1.55s ==============================
