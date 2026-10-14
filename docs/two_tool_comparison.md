@@ -10,12 +10,18 @@ shipped implementation).
 
 ## Shared prompt (paste verbatim into both tools)
 
-> Write a Python function `assert_within_budget(budget_limit, projected_total)`
-> using `decimal.Decimal` for both arguments. `budget_limit` may be `None`
-> (meaning no limit, always allowed). Raise `BudgetExceededError` with a
-> message including both values if `projected_total` exceeds `budget_limit`.
-> A `projected_total` exactly equal to `budget_limit` must be **allowed**
-> (inclusive boundary).
+> Write a Python function `assert_within_budget_gemini(shopping_list, projected_total)`
+> using `decimal.Decimal`. `shopping_list` is a SQLAlchemy `ShoppingList` model
+> with a `budget_limit` attribute (a `Numeric` column, may be `None` meaning no
+> limit, always allowed). `projected_total` is a `Decimal`. Raise
+> `BudgetExceededError` (from `backend.app.errors`) with a message including
+> both values if `projected_total` exceeds `budget_limit`. A `projected_total`
+> exactly equal to `budget_limit` must be **allowed** (inclusive boundary).
+> Never use `float` for money. Return only the function, with imports.
+
+Note: the signature matches the shipped function (takes the model, not a bare
+`budget_limit`) so both tools solve the same problem. Run it in a fresh
+workspace with no view of `backend/app/services/budget.py`.
 
 ## Claude Code's implementation (shipped)
 
