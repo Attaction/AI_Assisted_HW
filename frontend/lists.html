@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShareList — My Lists</title>
+  <link rel="stylesheet" href="static/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>My Lists</h1>
+    <button id="logout-btn">Log out</button>
+  </div>
+
+  <form id="create-form">
+    <input type="text" id="new-name" placeholder="List name" required />
+    <input type="number" id="new-budget" placeholder="Budget limit (optional)" min="0" step="0.01" />
+    <button type="submit">Create list</button>
+    <div class="error" id="create-error"></div>
+  </form>
+
+  <div id="lists-container"></div>
+
+  <script src="static/app.js"></script>
+  <script>
+    requireAuthOrRedirect();
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      clearToken();
+      window.location.href = "index.html";
+    });
+
+    async function loadLists() {
+      const container = document.getElementById("lists-container");
+      try {
+        const lists = await apiFetch("/lists");
+        container.innerHTML = "";
+        lists.forEach((list) => {
+          const div = document.createElement("div");
+          div.className = "list-card";
+          const pct = list.budget_limit
+            ? Math.min(100, (list.total / list.budget_limit) * 100)
+            : 0;
+          div.innerHTML = `
+            <strong><a href="list_detail.html?id=${list.id}">${list.name}</a></strong>
+            <div>Total: ${list.total}${list.budget_limit ? " / " + list.budget_limit : " (no budget limit)"}</div>
+            ${list.budget_limit ? `<div class="budget-bar"><div class="budget-bar-fill" style="width:${pct}%"></div></div>` : ""}
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        container.textContent = err.message;
+      }
+    }
+
+    document.getElementById("create-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById("create-error");
+      showError(errEl, "");
+      const budgetVal = document.getElementById("new-budget").value;
+      try {
+        await apiFetch("/lists", {
+          method: "POST",
+          body: JSON.stringify({
+            name: document.getElementById("new-name").value,
+            budget_limit: budgetVal === "" ? null : Number(budgetVal),
+          }),
+        });
+        document.getElementById("create-form").reset();
+        loadLists();
+      } catch (err) {
+        showError(errEl, err.message);
+      }
+    });
+
+    loadLists();
+  </script>
+</body>
+</html>

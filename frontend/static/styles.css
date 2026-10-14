@@ -1,0 +1,25 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #222;
+}
+h1 { font-size: 1.4rem; }
+form { display: flex; flex-direction: column; gap: 0.5rem; max-width: 360px; }
+input, button { padding: 0.5rem; font-size: 1rem; }
+button { cursor: pointer; }
+.error { color: #b00020; font-size: 0.9rem; }
+.list-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.budget-bar { background: #eee; border-radius: 4px; height: 10px; overflow: hidden; margin: 0.5rem 0; }
+.budget-bar-fill { background: #4caf50; height: 100%; }
+.budget-bar-fill.over { background: #b00020; }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { text-align: left; padding: 0.4rem; border-bottom: 1px solid #eee; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+a { color: #1a73e8; text-decoration: none; }

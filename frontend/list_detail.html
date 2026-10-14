@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShareList — List</title>
+  <link rel="stylesheet" href="static/styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1 id="list-name">List</h1>
+    <a href="lists.html">&larr; Back</a>
+  </div>
+  <div id="budget-info"></div>
+
+  <form id="add-item-form">
+    <input type="text" id="item-name" placeholder="Item name" required />
+    <input type="number" id="item-qty" placeholder="Quantity" min="1" value="1" required />
+    <input type="number" id="item-price" placeholder="Unit price" min="0" step="0.01" required />
+    <button type="submit">Add item</button>
+    <div class="error" id="item-error"></div>
+  </form>
+
+  <table id="items-table">
+    <thead><tr><th>Bought</th><th>Name</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead>
+    <tbody id="items-body"></tbody>
+  </table>
+
+  <h2>Collaborators</h2>
+  <div id="collaborators-container"></div>
+  <form id="add-collab-form">
+    <input type="text" id="collab-username" placeholder="Username" required />
+    <select id="collab-role">
+      <option value="editor">editor</option>
+      <option value="viewer">viewer</option>
+    </select>
+    <button type="submit">Invite</button>
+    <div class="error" id="collab-error"></div>
+  </form>
+
+  <script src="static/app.js"></script>
+  <script>
+    requireAuthOrRedirect();
+    const listId = new URLSearchParams(window.location.search).get("id");
+    let myUserId = null;
+    let myRole = null; // "owner" | "editor" | "viewer"
+
+    async function loadMe() {
+      const me = await apiFetch("/auth/me");
+      myUserId = me.id;
+    }
+
+    async function loadList() {
+      const list = await apiFetch(`/lists/${listId}`);
+      myRole = list.owner_id === myUserId ? "owner" : null;
+
+      document.getElementById("list-name").textContent = list.name;
+      const budgetEl = document.getElementById("budget-info");
+      budgetEl.innerHTML = list.budget_limit
+        ? `Total: ${list.total} / ${list.budget_limit}`
+        : `Total: ${list.total} (no budget limit)`;
+
+      if (myRole !== "owner") {
+        const collabs = await apiFetch(`/lists/${listId}/collaborators`).catch(() => []);
+        const mine = collabs.find((c) => c.user_id === myUserId);
+        myRole = mine ? mine.role : "none";
+      }
+
+      const canEdit = myRole === "owner" || myRole === "editor";
+      document.getElementById("add-item-form").style.display = canEdit ? "flex" : "none";
+      document.getElementById("add-collab-form").style.display =
+        myRole === "owner" ? "flex" : "none";
+
+      const tbody = document.getElementById("items-body");
+      tbody.innerHTML = "";
+      list.items.forEach((item) => {
+        const tr = document.createElement("tr");
+        const subtotal = (item.quantity * item.unit_price).toFixed(2);
+        tr.innerHTML = `
+          <td><input type="checkbox" ${item.is_bought ? "checked" : ""} data-id="${item.id}" class="bought-toggle" /></td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit_price}</td>
+          <td>${subtotal}</td>
+          <td>${canEdit ? `<button data-id="${item.id}" class="delete-item">Delete</button>` : ""}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll(".bought-toggle").forEach((el) => {
+        el.addEventListener("change", async (e) => {
+          await apiFetch(`/lists/${listId}/items/${e.target.dataset.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_bought: e.target.checked }),
+          });
+          loadList();
+        });
+      });
+      tbody.querySelectorAll(".delete-item").forEach((el) => {
+        el.addEventListener("click", async (e) => {
+          await apiFetch(`/lists/${listId}/items/${e.target.dataset.id}`, { method: "DELETE" });
+          loadList();
+        });
+      });
+
+      if (myRole === "owner") loadCollaborators();
+    }
+
+    async function loadCollaborators() {
+      const container = document.getElementById("collaborators-container");
+      try {
+        const collabs = await apiFetch(`/lists/${listId}/collaborators`);
+        container.innerHTML = collabs
+          .map((c) => `<div>${c.username} (${c.role})</div>`)
+          .join("") || "<div>No collaborators yet.</div>";
+      } catch (err) {
+        container.textContent = err.message;
+      }
+    }
+
+    document.getElementById("add-item-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById("item-error");
+      showError(errEl, "");
+      try {
+        await apiFetch(`/lists/${listId}/items`, {
+          method: "POST",
+          body: JSON.stringify({
+            name: document.getElementById("item-name").value,
+            quantity: Number(document.getElementById("item-qty").value),
+            unit_price: Number(document.getElementById("item-price").value),
+          }),
+        });
+        document.getElementById("add-item-form").reset();
+        document.getElementById("item-qty").value = 1;
+        loadList();
+      } catch (err) {
+        showError(errEl, err.message);
+      }
+    });
+
+    document.getElementById("add-collab-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById("collab-error");
+      showError(errEl, "");
+      try {
+        await apiFetch(`/lists/${listId}/collaborators`, {
+          method: "POST",
+          body: JSON.stringify({
+            username: document.getElementById("collab-username").value,
+            role: document.getElementById("collab-role").value,
+          }),
+        });
+        document.getElementById("add-collab-form").reset();
+        loadCollaborators();
+      } catch (err) {
+        showError(errEl, err.message);
+      }
+    });
+
+    loadMe().then(loadList);
+  </script>
+</body>
+</html>
