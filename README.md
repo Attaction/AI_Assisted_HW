@@ -69,7 +69,7 @@ reasoning, verification evidence) are in **[docs/ai_decisions.md](docs/ai_decisi
 
 One feature (`assert_within_budget`) was implemented independently with two
 AI tools and compared — see **[docs/two_tool_comparison.md](docs/two_tool_comparison.md)**
-(Gemini half to be filled in by actually running Gemini — not simulated).
+(Gemini half generated separately in Antigravity and tested, not simulated).
 
 ## Development history note
 
