@@ -1,0 +1,47 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-8.3.4, pluggy-1.6.0 -- C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW\.venv_setup\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW
+plugins: anyio-4.15.1
+collecting ... collected 1 item
+
+tests/test_budget_rule.py::test_add_item_exact_budget_boundary_allowed FAILED [100%]
+
+================================== FAILURES ===================================
+_________________ test_add_item_exact_budget_boundary_allowed _________________
+
+client = <starlette.testclient.TestClient object at 0x0000026335302B60>
+
+    def test_add_item_exact_budget_boundary_allowed(client):
+        """AC4 (edge): a projected total exactly equal to budget_limit is allowed (inclusive boundary)."""
+        headers = register_and_login(client, "budgetuser2")
+        list_id = client.post(
+            "/lists", json={"name": "Party", "budget_limit": 100}, headers=headers
+        ).json()["id"]
+    
+        resp = client.post(
+            f"/lists/{list_id}/items",
+            json={"name": "Cups", "quantity": 10, "unit_price": 10},
+            headers=headers,
+        )
+>       assert resp.status_code == 201
+E       assert 409 == 201
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+tests\test_budget_rule.py:34: AssertionError
+============================== warnings summary ===============================
+.venv_setup\lib\site-packages\starlette\testclient.py:40
+  C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW\.venv_setup\lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv_setup\lib\site-packages\pydantic\_internal\_config.py:295
+.venv_setup\lib\site-packages\pydantic\_internal\_config.py:295
+.venv_setup\lib\site-packages\pydantic\_internal\_config.py:295
+.venv_setup\lib\site-packages\pydantic\_internal\_config.py:295
+  C:\Users\dani\Desktop\BME\MSc\MI_MSc\semester_2\AI_Assisted\HW\Shopping_List_HW\.venv_setup\lib\site-packages\pydantic\_internal\_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_budget_rule.py::test_add_item_exact_budget_boundary_allowed
+======================== 1 failed, 5 warnings in 0.51s ========================
