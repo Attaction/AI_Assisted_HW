@@ -70,3 +70,12 @@ reasoning, verification evidence) are in **[docs/ai_decisions.md](docs/ai_decisi
 One feature (`assert_within_budget`) was implemented independently with two
 AI tools and compared — see **[docs/two_tool_comparison.md](docs/two_tool_comparison.md)**
 (Gemini half to be filled in by actually running Gemini — not simulated).
+
+## Development history note
+
+The first working version was built locally in a single session on 2026-10-07.
+On 2026-10-14 that work was split into logical commits (scaffold, spec, models,
+auth, services, routers, frontend, tests, faulty/fixed evidence, AI docs,
+README) and pushed. All commit timestamps therefore reflect the split date, not
+the original development time. Later work (Gemini comparison, change request)
+is committed as it is done.
