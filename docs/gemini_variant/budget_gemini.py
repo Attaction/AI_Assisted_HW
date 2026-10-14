@@ -1,27 +1,26 @@
-"""PLACEHOLDER — paste Gemini's output here.
+"""Gemini (Antigravity) independent implementation of the budget check.
 
-This file is meant to hold Gemini's independent implementation of
-`assert_within_budget`, written from the same prompt given to Claude Code
-(see ../two_tool_comparison.md for the exact prompt and the comparison
-write-up template). It must not be filled in by Claude Code itself — the
-homework requires genuinely running a second AI tool and comparing results,
-not a simulated second opinion.
-
-Steps to fill this in for real:
-1. Open Gemini (course-provided access is enough).
-2. Paste the prompt from ../two_tool_comparison.md.
-3. Paste Gemini's returned function body below, unmodified.
-4. Run it against tests/test_budget_rule.py (temporarily swap it in for
-   backend/app/services/budget.py::assert_within_budget, same way the
-   faulty/fixed pair was captured) and record which tests pass/fail.
-5. Fill in the comparison table and evaluation in ../two_tool_comparison.md.
+Generated from the shared prompt in ../two_tool_comparison.md, run in a separate
+workspace that did not contain backend/app/services/budget.py. Pasted unmodified
+below this docstring.
 """
 
 from decimal import Decimal
 
 from backend.app.errors import BudgetExceededError
-from backend.app.models import ShoppingList
 
 
-def assert_within_budget_gemini(shopping_list: ShoppingList, projected_total: Decimal) -> None:
-    raise NotImplementedError("Paste Gemini's generated implementation here.")
+def assert_within_budget_gemini(shopping_list, projected_total: Decimal) -> None:
+    if shopping_list.budget_limit is None:
+        return
+
+    budget_limit = (
+        shopping_list.budget_limit
+        if isinstance(shopping_list.budget_limit, Decimal)
+        else Decimal(str(shopping_list.budget_limit))
+    )
+
+    if projected_total > budget_limit:
+        raise BudgetExceededError(
+            f"Projected total {projected_total} exceeds budget limit of {budget_limit}."
+        )
